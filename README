@@ -4,6 +4,6 @@ echo server/client application with UDP Protocol
 
 type of server
 ----
-1. server => iterative
+1. server => iterative (not reliable). if a client datagram is lost,it is hang up.
 
 
