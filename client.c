@@ -64,6 +64,44 @@ void dg_cli2(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t servlen)
 	}
 }
 
+void dg_cli3(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t servlen)
+{
+	int n;
+	char sendline[MAXLINE],recvline[MAXLINE+1];
+
+	/* UDP socket receive buffer size */
+	n = 1024*100;
+	if (setsockopt(sockfd,SOL_SOCKET,SO_RCVBUF,&n,sizeof(n)) == -1){
+		perror("setsockopt");
+		return;
+	}
+
+	if (connect(sockfd,(struct sockaddr *) servaddr,servlen) == -1){
+		perror("connect");
+		return;
+	}
+
+	while(fgets(sendline,MAXLINE,fp) != NULL){
+		
+		if (write(sockfd,sendline,strlen(sendline)) == -1){
+			perror("write");
+			continue;
+		}
+
+		n = read(sockfd,recvline,MAXLINE);
+		if (n <= 0){
+			perror("read");
+			continue;
+		}
+
+		recvline[n] = '\0';
+		if (fputs(recvline,stdout) == -1){
+			perror("fputs");
+			continue;
+		}
+	}
+}
+
 int main(int argc,char *argv[])
 {
 	int sockfd;
@@ -88,6 +126,6 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	dg_cli(stdin,sockfd,(struct sockaddr *) &servaddr,sizeof(servaddr));
+	dg_cli3(stdin,sockfd,(struct sockaddr *) &servaddr,sizeof(servaddr));
 	exit(0);
 }
