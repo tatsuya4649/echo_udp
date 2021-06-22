@@ -6,4 +6,8 @@ type of server
 ----
 1. server => iterative (not reliable). if a client datagram is lost,it is hang up.
 
+type of echo function
+----
+1. dg_cli => receive from stdin,send to server and echoed to stdout
+2. dg_cli2=> client with 'connect' for receiving ICMP error
 

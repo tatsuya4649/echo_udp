@@ -1,4 +1,5 @@
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,21 +12,47 @@ void dg_cli(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t servlen)
 {
 	int n;
 	char sendline[MAXLINE],recvline[MAXLINE+1];
-	socklen_t len;
-	struct sockaddr *preply_addr;
-
-	preply_addr = malloc(servlen);
+	int len;
 
 	while(fgets(sendline,MAXLINE,fp) != NULL){
-		if (sendto(sockfd,sendline,strlen(sendline),0,servaddr,len) == -1){
+		if (sendto(sockfd,sendline,MAXLINE,0,(struct sockaddr *) servaddr,servlen) == -1){
 			perror("sendto");
 			continue;
 		}
 
-		len = servlen;
-		n = recvfrom(sockfd,recvline,MAXLINE,0,preply_addr,&len);
-		if (len != servlen || memcmp(servaddr,preply_addr,len) != 0){
-			fprintf(stderr,"reply from (ignored)\n");
+		n = recvfrom(sockfd,recvline,MAXLINE,0,NULL,NULL);
+		if (n == -1){
+			perror("recvfrom");
+			return;
+		}
+		recvline[n] = '\0';
+		if (fputs(recvline,stdout) == -1){
+			perror("fputs");
+			continue;
+		}
+	}
+}
+
+void dg_cli2(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t servlen)
+{
+	int n;
+	char sendline[MAXLINE],recvline[MAXLINE+1];
+
+	if (connect(sockfd,(struct sockaddr *) servaddr,servlen) == -1){
+		perror("connect");
+		return;
+	}
+
+	while(fgets(sendline,MAXLINE,fp) != NULL){
+		
+		if (write(sockfd,sendline,strlen(sendline)) == -1){
+			perror("write");
+			continue;
+		}
+
+		n = read(sockfd,recvline,MAXLINE);
+		if (n <= 0){
+			perror("read");
 			continue;
 		}
 
