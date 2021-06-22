@@ -7,10 +7,14 @@
 #include <arpa/inet.h>
 #include "echo.h"
 
-void dg_cli(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t len)
+void dg_cli(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t servlen)
 {
 	int n;
 	char sendline[MAXLINE],recvline[MAXLINE+1];
+	socklen_t len;
+	struct sockaddr *preply_addr;
+
+	preply_addr = malloc(servlen);
 
 	while(fgets(sendline,MAXLINE,fp) != NULL){
 		if (sendto(sockfd,sendline,strlen(sendline),0,servaddr,len) == -1){
@@ -18,7 +22,13 @@ void dg_cli(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t len)
 			continue;
 		}
 
-		n = recvfrom(sockfd,recvline,MAXLINE,0,NULL,NULL);
+		len = servlen;
+		n = recvfrom(sockfd,recvline,MAXLINE,0,preply_addr,&len);
+		if (len != servlen || memcmp(servaddr,preply_addr,len) != 0){
+			fprintf(stderr,"reply from (ignored)\n");
+			continue;
+		}
+
 		recvline[n] = '\0';
 		if (fputs(recvline,stdout) == -1){
 			perror("fputs");
