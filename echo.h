@@ -1,2 +1,3 @@
 
 #define SERV_PORT	11000
+#define MAXLINE		1000

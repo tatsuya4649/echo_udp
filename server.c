@@ -7,6 +7,24 @@
 
 void dg_echo(int sockfd,struct sockaddr *cliaddr,size_t size)
 {
+	int n;
+	socklen_t len;
+	char mesg[MAXLINE];
+
+	for (;;)
+	{
+		len = size;
+		n = recvfrom(sockfd,mesg,MAXLINE,0,cliaddr,&len);
+		if (n == -1){
+			perror("recvfrom");
+			return;
+		}
+
+		if (sendto(sockfd,mesg,n,0,cliaddr,len) == -1){
+			perror("sendto");
+			return;
+		}
+	}
 }
 
 int main(int argc,char *argv[])
