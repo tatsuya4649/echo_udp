@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# start up server
+./bin/server
