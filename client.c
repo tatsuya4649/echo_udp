@@ -20,7 +20,7 @@ void dg_cli(FILE *fp,int sockfd,struct sockaddr *servaddr,size_t len)
 
 		n = recvfrom(sockfd,recvline,MAXLINE,0,NULL,NULL);
 		recvline[n] = '\0';
-		if (fputs(recvline,fp) == -1){
+		if (fputs(recvline,stdout) == -1){
 			perror("fputs");
 			continue;
 		}
